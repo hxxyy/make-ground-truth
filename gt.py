@@ -30,13 +30,6 @@ res = img_hsv1.copy()
  
 for i in range(res[:, :, 2].shape[0]):
     for j in range(res[:, :, 2].shape[1]):
-        # if  img_hsv1[:, :, 2][i][j] > 127:
-        #     res[i][j] = img_hsv1[i][j] 
-
-        # elif img_hsv2[:, :, 2][i][j] < 127:
-        #     res[i][j] = img_hsv2[i][j] 
-
-        # else:
         res[i][j] = (img_hsv1[i][j] * darker(img_hsv2[:, :, 2][i][j])  + img_hsv2[i][j]  * lighter(img_hsv2[:, :, 2][i][j]) + img_hsv2[i][j] * middle(img_hsv2[:, :, 2][i][j])) /( darker(img_hsv2[:, :, 2][i][j]) + lighter(img_hsv2[:, :, 2][i][j]) + middle(img_hsv2[:, :, 2][i][j]))
 
 res = cv2.cvtColor(res, cv2.COLOR_HSV2BGR)
