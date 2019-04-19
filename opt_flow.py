@@ -1,25 +1,11 @@
 #!/usr/bin/env python
 
-'''
-example to show optical flow
-
-USAGE: opt_flow.py [<video_source>]
-
-Keys:
- 1 - toggle HSV flow visualization
- 2 - toggle glitch
-
-Keys:
-    ESC    - exit
-'''
-
 # Python 2/3 compatibility
 from __future__ import print_function
 
 import numpy as np
+import math
 import cv2 as cv
-
-# import video
 
 
 def draw_flow(img, flow, step=16):
@@ -32,29 +18,26 @@ def draw_flow(img, flow, step=16):
     cv.polylines(vis, lines, 0, (0, 255, 0))
     for (x1, y1), (_x2, _y2) in lines:
         cv.circle(vis, (x1, y1), 1, (0, 255, 0), -1)
+    cv.imwrite('res.jpg', vis)
     return vis
 
+def align(img,flow):
+    res = img.copy()
+    for i in range(img[:, :, 2].shape[0]):
+        for j in range(img[:, :, 2].shape[1]):
+            try:
+                fx, fy = flow[j,i].T
+                fx = math.floor(fx)
+                fy = math.floor(fy)
+                res[i+fx,j+fy] = img[i,j]
+            except:
+                # print (i+fx,j+fy)
+                pass
+                
 
-def draw_hsv(flow):
-    h, w = flow.shape[:2]
-    fx, fy = flow[:,:,0], flow[:,:,1]
-    ang = np.arctan2(fy, fx) + np.pi
-    v = np.sqrt(fx*fx+fy*fy)
-    hsv = np.zeros((h, w, 3), np.uint8)
-    hsv[...,0] = ang*(180/np.pi/2)
-    hsv[...,1] = 255
-    hsv[...,2] = np.minimum(v*4, 255)
-    bgr = cv.cvtColor(hsv, cv.COLOR_HSV2BGR)
-    return bgr
+    cv.imwrite('aligned.jpg',res)
+    return
 
-
-def warp_flow(img, flow):
-    h, w = flow.shape[:2]
-    flow = -flow
-    flow[:,:,0] += np.arange(w)
-    flow[:,:,1] += np.arange(h)[:,np.newaxis]
-    res = cv.remap(img, flow, None, cv.INTER_LINEAR)
-    return res
 
 def main():
     import sys
@@ -65,31 +48,31 @@ def main():
 
     img1 = cv.imread('1.jpg')
     img2 = cv.imread('2.jpg')
-    x, y = img1.shape[0:2]
-    img1 = cv.resize(img1, (int(y / 4), int(x / 4)))
-    img2 = cv.resize(img2, (int(y / 4), int(x / 4)))
 
+    # x, y = img1.shape[0:2]
+    # img1 = cv.resize(img1, (int(y / 2), int(x / 2)))
+
+    # img2 = cv.resize(img2, (int(y / 2), int(x / 2)))
     
     prev = img1
     prevgray = cv.cvtColor(img1, cv.COLOR_BGR2GRAY)
-   
 
-    while True:
-        # ret, img = cam.read()
-        gray = cv.cvtColor(img2, cv.COLOR_BGR2GRAY)
-        flow = cv.calcOpticalFlowFarneback(prevgray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-        # prevgray = gray
+    # while True:
+    gray = cv.cvtColor(img2, cv.COLOR_BGR2GRAY)
+    flow = cv.calcOpticalFlowFarneback(prevgray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
 
-        cv.imshow('flow', draw_flow(gray, flow))
-        
+    cv.imshow('flow', draw_flow(gray, flow))
 
-        ch = cv.waitKey(5)
+    align(img2,flow)
+    
+
+    # ch = cv.waitKey(5)
          
 
     print('Done')
 
 
 if __name__ == '__main__':
-    print(__doc__)
+    print('start')
     main()
     cv.destroyAllWindows()
