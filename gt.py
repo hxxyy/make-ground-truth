@@ -25,14 +25,15 @@ def middle(v):
                 return 2 - v / 128
 
 
-img1 = cv2.imread('image/6.jpg')  #middle
-img2 = cv2.imread('image/7.jpg')  #dark
-img3 = cv2.imread('image/8.jpg')  #light
+img1 = cv2.imread('image/p1.jpg')  #middle
+img2 = cv2.imread('image/p2.jpg')  #dark
+img3 = cv2.imread('image/p3.jpg')  #light
 
 height, width = img1.shape[:2]
-img1 = cv2.resize(img1, (int(width/2), int(height/2)), interpolation=cv2.INTER_CUBIC)
-img2 = cv2.resize(img2, (int(width/2), int(height/2)), interpolation=cv2.INTER_CUBIC)
-img3 = cv2.resize(img3, (int(width/2), int(height/2)), interpolation=cv2.INTER_CUBIC)
+s = 4
+img1 = cv2.resize(img1, (int(width/s), int(height/s)), interpolation=cv2.INTER_CUBIC)
+img2 = cv2.resize(img2, (int(width/s), int(height/s)), interpolation=cv2.INTER_CUBIC)
+img3 = cv2.resize(img3, (int(width/s), int(height/s)), interpolation=cv2.INTER_CUBIC)
 
 img_hsv1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
 img_hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
@@ -44,14 +45,27 @@ print(res[:, :, 2].shape[0])
 for i in range(0,res[:, :, 2].shape[0]):
     print("i", i)
     for j in range(0,res[:, :, 2].shape[1]):
-        p1 = darker(img_hsv2[:, :, 2][i][j])
+        p1 = middle(img_hsv1[:, :, 2][i][j])
 
-        p2 = lighter(img_hsv3[:, :, 2][i][j])
+        p2 = darker(img_hsv2[:, :, 2][i][j])
 
-        p3 = middle(img_hsv1[:, :, 2][i][j])
+        p3 = lighter(img_hsv3[:, :, 2][i][j])
 
-        res[i][j] = (img_hsv1[i][j] * p1 + img_hsv2[i][j]  * p2 + img_hsv3[i][j] * p3 ) /( p1 + p2 + p3)
-        # print(res[i][j])
+        # if img_hsv1[:, :, 2][i][j] == 255 | img_hsv3[:, :, 2][i][j] == 255:
+        #     p2 = 1
+        #     p1 = 1
+        #     p0 = 1
+        #
+
+        res[i][j] = (img_hsv1[i][j] * p1 + img_hsv2[i][j] * p2 + img_hsv3[i][j] * p3) / (p1 + p2 + p3)
+
+        # print("p1",p1)
+        # print(img_hsv1[:, :, 2][i][j])
+        # print("p2",p2)
+        # print(img_hsv2[:, :, 2][i][j])
+        # print("p3",p3)
+        # print(img_hsv3[:, :, 2][i][j])
+        # print("res[i][j][2]",res[i][j][2])
 
 
 res = cv2.cvtColor(res, cv2.COLOR_HSV2BGR)
